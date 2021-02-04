@@ -3,6 +3,5 @@ obj/
 
 .vscode
 
-appsettings.Development*
-appsettings.Production*
 
+appsettings.json

@@ -1,4 +1,5 @@
 
+using System;
 using Bot.ConsoleUI.Service;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,20 +10,25 @@ namespace Bot.ConsoleUI.InversionOfControl
 {
     public static class Container
     {
+        private static IConfiguration Configuration;
         public static IServiceCollection AddConsoleServices(this IServiceCollection collection) =>
-            collection.AddSingleton<ICryptoPriceService, BitCoinPriceService>();
+            collection
+                .AddHttpClient(Configuration["CryptoSource:Name"], client =>
+                {
+                    client.BaseAddress = new Uri(Configuration["CryptoSource:BaseAddress"]);
+                })
+                .Services;
+
 
         public static void AddConsoleConfiguration(HostBuilderContext context,
             IConfigurationBuilder configurationBuilder)
         {
             configurationBuilder.Sources.Clear();
 
-            IHostEnvironment env = context.HostingEnvironment;
 
-            configurationBuilder
+            Configuration = configurationBuilder
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true, true)
-                .AddEnvironmentVariables();
+                .AddEnvironmentVariables().Build();
         }
 
 
