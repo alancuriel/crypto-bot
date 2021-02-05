@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using Bot.ConsoleUI.Services;
+using Bot.Core.Clients;
 
 namespace Bot.ConsoleUI.InversionOfControl
 {
@@ -16,6 +17,7 @@ namespace Bot.ConsoleUI.InversionOfControl
         private static IConfiguration Configuration;
         public static IServiceCollection AddConsoleServices(this IServiceCollection collection) =>
             collection
+                .AddSingleton<CoinBaseClient>()
                 .AddHostedService<CryptoCurrentPriceService>()
                 .AddHttpClient(Configuration["CryptoSource:Name"], client =>
                 {
