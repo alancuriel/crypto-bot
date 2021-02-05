@@ -12,4 +12,5 @@ RUN dotnet publish -c release -o /app --no-restore
 FROM mcr.microsoft.com/dotnet/runtime:5.0
 WORKDIR /app
 COPY --from=build /app .
+COPY Bot.ConsoleUI/appsettings.json .
 ENTRYPOINT ["dotnet", "Bot.ConsoleUI.dll"]

@@ -1,10 +1,13 @@
 
 using System;
 using System.Linq;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+
+using Bot.ConsoleUI.Services;
 
 namespace Bot.ConsoleUI.InversionOfControl
 {
@@ -13,6 +16,7 @@ namespace Bot.ConsoleUI.InversionOfControl
         private static IConfiguration Configuration;
         public static IServiceCollection AddConsoleServices(this IServiceCollection collection) =>
             collection
+                .AddHostedService<CryptoCurrentPriceService>()
                 .AddHttpClient(Configuration["CryptoSource:Name"], client =>
                 {
                     client.BaseAddress = new Uri(Configuration["CryptoSource:BaseAddress"]);
@@ -22,8 +26,7 @@ namespace Bot.ConsoleUI.InversionOfControl
                 .Services;
 
 
-        public static void AddConsoleConfiguration(HostBuilderContext context,
-            IConfigurationBuilder configurationBuilder)
+        public static void AddConsoleConfiguration(IConfigurationBuilder configurationBuilder)
         {
             configurationBuilder.Sources.Clear();
 
@@ -37,8 +40,8 @@ namespace Bot.ConsoleUI.InversionOfControl
             Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(logging =>
                     logging.ClearProviders().AddConsole())
-                .ConfigureAppConfiguration((hostingContext, configuration) =>
-                    AddConsoleConfiguration(hostingContext, configuration))
+                .ConfigureAppConfiguration((_, configuration) =>
+                    AddConsoleConfiguration(configuration))
                 .ConfigureServices((_, services) => services.AddConsoleServices());
     }
 }
