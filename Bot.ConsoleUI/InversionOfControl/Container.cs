@@ -1,6 +1,6 @@
 
 using System;
-using Bot.ConsoleUI.Service;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,6 +16,8 @@ namespace Bot.ConsoleUI.InversionOfControl
                 .AddHttpClient(Configuration["CryptoSource:Name"], client =>
                 {
                     client.BaseAddress = new Uri(Configuration["CryptoSource:BaseAddress"]);
+                    client.DefaultRequestHeaders
+                        .Add("CB-ACCESS-KEY", Configuration["CryptoSource:ApiKey"]);
                 })
                 .Services;
 
@@ -24,7 +26,6 @@ namespace Bot.ConsoleUI.InversionOfControl
             IConfigurationBuilder configurationBuilder)
         {
             configurationBuilder.Sources.Clear();
-
 
             Configuration = configurationBuilder
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)

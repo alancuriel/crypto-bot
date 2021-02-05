@@ -1,8 +1,12 @@
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using Bot.Core.Models.Coinbase;
 using Microsoft.Extensions.Configuration;
+
+using Bot.Core.Models.Coinbase;
+using Bot.Core.Helpers;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Bot.Core.Clients
 {
@@ -18,11 +22,33 @@ namespace Bot.Core.Clients
         }
         public async Task<CryptoPriceModel> GetSpotPrice()
         {
-            var client = _httpClientFactory.CreateClient(_configuration["CryptoSource:Name"]);
+            HttpClient client = _httpClientFactory.CreateClient(_configuration["CryptoSource:Name"]);
 
+            var path = $"/v2/prices/{_configuration["CryptoSource:CurrencyPair"]}/spot";
+            var timestamp = TimeStamp.Now;
+            var method = "GET";
 
-            return await client
-                .GetFromJsonAsync<CryptoPriceModel>($"prices/{_configuration["CryptoSource:CurrencyPair"]}/spot");
+            string signature = CreateSignature(timestamp, method, path, "");
+
+            client.DefaultRequestHeaders
+                .Add("CB-ACCESS-SIGN", signature);
+
+            return await client.GetFromJsonAsync<CryptoPriceModel>(path);
+        }
+
+        private string CreateSignature(string timestamp, string method,
+            string requestPath, string body)
+        {
+
+            var key = Encoding.Default.GetBytes( 
+                _configuration["CryptoSource:AppSecret"]);
+
+            var message = Encoding.Default.GetBytes(
+                $"{timestamp}{method}{requestPath}{body}");          
+
+            var hash = new HMACSHA256(key);
+
+            return hash.ComputeHash(message).ToString();
         }
     }
 }

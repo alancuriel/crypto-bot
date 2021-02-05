@@ -5,7 +5,6 @@ using Microsoft.Extensions.Hosting;
 
 namespace Bot.ConsoleUI
 {
-
     class Program
     {
         static Task Main(string[] args) =>
